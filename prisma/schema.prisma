@@ -1,0 +1,103 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Caregiver {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  email     String    @unique
+  firstName String
+  lastName  String
+  category  CaregiverCategory
+  createdAt DateTime  @default(now())
+  profile   Profile?
+  documents Document[]
+  appointments Appointment[] @relation("CaregiverAppointments")
+  reviewsReceived Review[] @relation("CaregiverReviews")
+}
+
+model Profile {
+  id              Int     @id @default(autoincrement())
+  caregiverId     Int     @unique
+  bio             String?
+  experienceYears Int?
+  certifications  String?
+  hourlyRate      Float?
+  availability    Json?
+  createdAt       DateTime @default(now())
+  caregiver       Caregiver @relation(fields: [caregiverId], references: [id])
+}
+
+model Document {
+  id          Int       @id @default(autoincrement())
+  caregiverId Int
+  type        String
+  number      String
+  expiryDate  DateTime?
+  createdAt   DateTime  @default(now())
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], map: "Document_caregiver_fkey")
+}
+
+model Appointment {
+  id              Int       @id @default(autoincrement())
+  caregiverId     Int
+  serviceId       Int
+  appointmentDate DateTime
+  durationHours   Int
+  status          AppointmentStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  caregiver       Caregiver @relation("CaregiverAppointments", fields: [caregiverId], references: [id], map: "Appointment_caregiverId_fkey")
+  service         Service   @relation(fields: [serviceId], references: [id])
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  caregiverId Int
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+  caregiver   Caregiver @relation("CaregiverReviews", fields: [caregiverId], references: [id])
+}
+
+model Service {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  appointments Appointment[]
+}
+model Request {
+  id             Int             @id @default(autoincrement())
+  typeOfCare     String
+  location       String
+  specification  CaregiverCategory
+  status         RequestStatus   @default(PENDING)
+  createdAt      DateTime        @default(now())
+  caregiverId    Int?
+  caregiver      Caregiver?      @relation(fields: [caregiverId], references: [id])
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum CaregiverCategory {
+  BABY_SITTER
+  ELDERLY_CARE
+  NURSE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
