@@ -8,18 +8,22 @@ generator client {
 }
 
 model Caregiver {
-  id        Int       @id @default(autoincrement())
-  username  String    @unique
-  password  String
-  email     String    @unique
-  firstName String
-  lastName  String
-  category  CaregiverCategory
-  createdAt DateTime  @default(now())
-  profile   Profile?
-  documents Document[]
-  appointments Appointment[] @relation("CaregiverAppointments")
-  reviewsReceived Review[] @relation("CaregiverReviews")
+  id              Int              @id @default(autoincrement())
+  username        String           @unique
+  password        String
+  email           String           @unique
+  firstName       String
+  lastName        String
+  typeofcare      typeOfCare
+  category        CaregiverCategory
+  latitude        Float
+  longitude       Float
+  createdAt       DateTime         @default(now())
+  profile         Profile?
+  documents       Document[]
+  appointments    Appointment[]    @relation("CaregiverAppointments")
+  reviewsReceived Review[]         @relation("CaregiverReviews")
+  requests        Request[]        @relation("CaregiverRequests")
 }
 
 model Profile {
@@ -46,6 +50,7 @@ model Document {
 
 model Appointment {
   id              Int       @id @default(autoincrement())
+  userid          Int       
   caregiverId     Int
   serviceId       Int
   appointmentDate DateTime
@@ -67,20 +72,23 @@ model Review {
 
 model Service {
   id          Int          @id @default(autoincrement())
-  name        String
+  name        String       @unique
   description String?
   createdAt   DateTime     @default(now())
   appointments Appointment[]
 }
+
 model Request {
   id             Int             @id @default(autoincrement())
-  typeOfCare     String
-  location       String
+  userid        Int
+  typeofcare   typeOfCare
+  latitude        Float
+  longitude       Float
   specification  CaregiverCategory
   status         RequestStatus   @default(PENDING)
   createdAt      DateTime        @default(now())
   caregiverId    Int?
-  caregiver      Caregiver?      @relation(fields: [caregiverId], references: [id])
+  caregiver      Caregiver?      @relation(fields: [caregiverId], references: [id], name: "CaregiverRequests")
 }
 
 enum RequestStatus {
@@ -93,6 +101,12 @@ enum CaregiverCategory {
   BABY_SITTER
   ELDERLY_CARE
   NURSE
+}
+
+enum typeOfCare{
+  SHORT_TERM
+  LONG_TERM
+  BOTH
 }
 
 enum AppointmentStatus {

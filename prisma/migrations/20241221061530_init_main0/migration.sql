@@ -1,5 +1,11 @@
 -- CreateEnum
+CREATE TYPE "RequestStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+
+-- CreateEnum
 CREATE TYPE "CaregiverCategory" AS ENUM ('BABY_SITTER', 'ELDERLY_CARE', 'NURSE');
+
+-- CreateEnum
+CREATE TYPE "typeOfCare" AS ENUM ('SHORT_TERM', 'LONG_TERM');
 
 -- CreateEnum
 CREATE TYPE "AppointmentStatus" AS ENUM ('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED');
@@ -12,7 +18,10 @@ CREATE TABLE "Caregiver" (
     "email" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
+    "typeofcare" "typeOfCare" NOT NULL,
     "category" "CaregiverCategory" NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Caregiver_pkey" PRIMARY KEY ("id")
@@ -78,6 +87,20 @@ CREATE TABLE "Service" (
     CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Request" (
+    "id" SERIAL NOT NULL,
+    "typeOfCare" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "specification" "CaregiverCategory" NOT NULL,
+    "status" "RequestStatus" NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "caregiverId" INTEGER,
+
+    CONSTRAINT "Request_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Caregiver_username_key" ON "Caregiver"("username");
 
@@ -101,3 +124,6 @@ ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_serviceId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_caregiverId_fkey" FOREIGN KEY ("caregiverId") REFERENCES "Caregiver"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Request" ADD CONSTRAINT "Request_caregiverId_fkey" FOREIGN KEY ("caregiverId") REFERENCES "Caregiver"("id") ON DELETE SET NULL ON UPDATE CASCADE;
