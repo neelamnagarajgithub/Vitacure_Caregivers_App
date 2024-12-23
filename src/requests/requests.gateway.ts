@@ -5,7 +5,7 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { WsAuthGuard } from 'src/auth/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
 
-@WebSocketGateway()
+@WebSocketGateway({namespace:'/requests'})
 export class RequestsGateway {
   @WebSocketServer()
   server: Server;
